@@ -14,7 +14,7 @@ const dot=(x,y)=>x[0]*y[0]+x[1]*y[1]+x[2]*y[2];
 return{el:Math.asin(Math.max(-1,Math.min(1,dot(s,up))))/R,az:(Math.atan2(dot(s,e),dot(s,n))/R+360)%360}}
 const site=i=>SITES[i];
 function at(s,ms){const g=geo(ms);return{sun:dirEl(s.la,s.lo,g.sl,g.sb),earth:dirEl(s.la,s.lo,g.el,g.eb),g}}
-const cache={},API={on:false,llm:false,base:new URLSearchParams(location.search).get("api")||""},acache={},pend={};let SWEEP=false;
+const cache={},API={on:false,llm:false,base:new URLSearchParams(location.search).get("api")||"https://luna-view.vercel.app"},acache={},pend={};let SWEEP=false;
 const skey=(s,t0)=>[s.la,s.lo,t0].join();
 function ser(s,t0,days=30,step=2){const k=[s.la,s.lo,t0,days,step].join();
 if(API.on&&!SWEEP&&days==30&&step==2){const a=acache[skey(s,t0)];if(a)return a;
