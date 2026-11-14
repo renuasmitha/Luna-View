@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>LUNA-VIEW</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"></head><body>
+<header><div class="brand">LUNA<b>-</b>VIEW</div><nav id="nav"></nav><button id="th" title="Toggle theme" style="margin-left:auto">◐</button></header>
+<div class="bar">
+<label>Landing site<select id="site"></select></label>
+<label>Lat °<input id="lat" type="number" step="0.01" min="-90" max="90" style="width:84px"></label>
+<label>Lon °E<input id="lon" type="number" step="0.01" min="-180" max="180" style="width:84px"></label>
+<button id="ap">Use custom</button>
+<label>Mission start (UTC)<input id="dt" type="datetime-local"></label>
+<label>Horizon mask <span id="mv">0°</span><input id="mask" type="range" min="0" max="10" step="0.5" value="0"></label>
+<span id="src" class="pill cy" style="align-self:center"></span>
+</div>
+<main>
+<section id="overview"><h1>LUNA-VIEW</h1><p class="tag">Every Landing. Every Orbit. Every Decision.</p>
+<p class="sub">An interactive planner for lunar south-pole landing sites. Pick a site and date, and see where the Sun and Earth sit against the local horizon, when light and an Earth line of sight overlap, and how a schedule slip changes it.</p>
+<p><button class="p" onclick="go('timeline')">Launch Mission Planner</button></p>
+<div class="grid" id="dash" style="margin:16px 0"></div>
+<div class="grid g2"><div class="card"><h3>Sky from the selected site</h3><canvas id="sky0"></canvas></div><div class="card"><h3>South-polar map</h3><canvas id="map0"></canvas></div></div>
+<div class="note"><b>Decision-support and educational tool.</b> Not an official NASA landing-site selection system; no NASA endorsement is implied. Calculation model and limits are listed under <a href="#about" style="color:var(--cy)">About &amp; data</a>.</div></section>
+
+<section id="explorer"><h2>Lunar Explorer</h2><p class="sub">Azimuthal polar map from 90°S to 80°S (lon 0° at top). Gold line: direction of the Sun’s sub-point; cyan line: sub-Earth direction, at the selected time. Click a site to select it. A true 3D terrain globe is planned, not built.</p>
+<div class="grid g2"><div class="card"><canvas id="map1"></canvas></div><div class="card"><div id="siteinfo"></div></div></div></section>
+
+<section id="solar"><h2>Sun Position Intelligence</h2><p class="sub">Solar elevation over a 30-day window from the mission start.</p><div class="grid" id="sm"></div>
+<div class="card" style="margin-top:12px"><h3>Sun elevation (°)</h3><canvas id="c_sun"></canvas></div>
+<div class="note">“Power opportunity” means the Sun is above the horizon mask. It is an illumination estimate only. Real power also depends on array orientation, efficiency, terrain shadowing and hardware.</div></section>
+
+<section id="earth"><h2>Earth Communication Tracker</h2><p class="sub">Geometric Earth visibility over 30 days.</p><div class="grid" id="em"></div>
+<div class="card" style="margin-top:12px"><h3>Earth elevation (°)</h3><canvas id="c_earth"></canvas></div>
+<div class="note">Earth above the horizon is a geometric line of sight, not guaranteed communication. Antennas, spacecraft attitude, relay assets and signal conditions all matter.</div></section>
+
+<section id="timeline"><h2>Mission Timeline Simulator</h2><p class="sub">Scrub or play the 30-day window; everything updates.</p>
+<div class="bar" style="border:1px solid var(--line);border-radius:10px"><button id="pl" class="p">▶ Play</button><label>Speed<select id="spd"><option value="3">3 h/s</option><option value="12" selected>12 h/s</option><option value="48">48 h/s</option></select></label>
+<label style="flex:1;min-width:200px">Time <span id="tl"></span><input id="sl" type="range" min="0" max="720" value="0"></label></div>
+<div class="grid g2" style="margin-top:12px"><div class="card"><canvas id="sky1"></canvas></div><div class="card" id="tm"></div></div>
+<div class="card" style="margin-top:12px"><h3>Windows</h3><canvas id="strip"></canvas></div></section>
+
+<section id="compare"><h2>Mission Comparison Centre</h2><p class="sub">Scenario A is the site and date in the top bar. Choose Scenario B here.</p>
+<div class="bar" style="border:1px solid var(--line);border-radius:10px"><label>B site<select id="bs"></select></label><label>B start (UTC)<input id="bd" type="datetime-local"></label></div>
+<div class="grid g2" id="cards" style="margin-top:12px"></div>
+<div class="card" style="margin-top:12px"><h3>Elevation overlay (solid Sun, dashed Earth) · A cyan, B gold</h3><canvas id="c_cmp"></canvas></div>
+<div class="card" style="margin-top:12px"><h3>Summary &amp; trade-offs</h3><div id="sum"></div></div>
+<div class="card" style="margin-top:12px"><h3>Suitability assessment</h3><div id="suit"></div></div></section>
+
+<section id="resched"><h2>Mission Rescheduling Simulator</h2><p class="sub">Keep the site from the top bar and slip the start date. The sweep shows how each condition changes day by day.</p>
+<div class="bar" style="border:1px solid var(--line);border-radius:10px"><label style="flex:1;min-width:200px">Delay <span id="sv"></span><input id="sh" type="range" min="-30" max="60" value="7"></label></div>
+<div class="grid g2" id="rc" style="margin-top:12px"></div>
+<div class="card" style="margin-top:12px"><h3>Sunlight, Earth view and overlap vs. delay (% of a 30-day window; sweep uses the local model)</h3><canvas id="c_sw"></canvas></div>
+<div class="card" style="margin-top:12px" id="rs"></div></section>
+
+<section id="assistant"><h2>Mission Assistant</h2><p class="sub">Rule-based assistant. No LLM is connected, and every number it quotes comes from the calculations on this page.</p>
+<div class="card"><div class="chat" id="chat"></div><div class="chips" id="chips"></div>
+<div style="display:flex;gap:8px"><input id="q" style="flex:1" placeholder="Ask about the scenarios…"><button class="p" id="ask">Ask</button></div></div></section>
+
+<section id="about"><h2>About &amp; data</h2>
+<div class="card"><h3>Calculated values (this app)</h3><p>Low-precision analytic model, run in your browser. Sun: sub-solar longitude from the mean synodic month (29.5306 d, epoch 2000-01-06 18:14 UTC), sub-solar latitude from the Sun–lunar-node angle (±1.54°). Earth: optical libration in latitude (±6.7°, argument of latitude) and longitude (±6.3°, mean anomaly). Elevation = asin of the direction vector dotted with the local “up” at the site. Uncertainties of a degree or more are plausible, which matters near the pole where elevations are a few degrees. Lunar-orbit eccentricity, Earth’s and the Sun’s angular size, refraction-free vacuum and a spherical Moon are assumed. Terrain is not modelled; the horizon mask is a user-set flat obstruction angle.</p>
+<h3>Site coordinates</h3><p>Approximate values from public references for demonstration. Verify against LOLA / Moon Trek before relying on them. “Custom” is whatever you type.</p>
+<h3>Backend &amp; data status</h3><p><b>With the FastAPI backend running:</b> Sun and Earth elevations come from the JPL Horizons API (observer on the lunar surface, airless apparent elevation); if Horizons is unreachable the backend falls back to the analytic model and the source chip says so. The rescheduling sweep always uses the local model. <b>Optional:</b> LLM assistant via a server-side key. <b>Not integrated:</b> LOLA terrain and horizon masks, SPICE kernels, a 3D terrain globe. Use these for validated values: <a style="color:var(--cy)" href="https://ssd.jpl.nasa.gov/horizons/">JPL Horizons</a> · <a style="color:var(--cy)" href="https://naif.jpl.nasa.gov/naif/">NAIF SPICE</a> · <a style="color:var(--cy)" href="https://pds-geosciences.wustl.edu/missions/lro/lola.htm">LOLA (PDS)</a> · <a style="color:var(--cy)" href="https://trek.nasa.gov/moon/">Moon Trek</a>.</p></div></section>
+</main>
+<script src="app.js"></script></body></html>
