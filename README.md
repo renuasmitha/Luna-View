@@ -1,4 +1,4 @@
-# 🌙 LUNA-VIEW
+#  LUNA-VIEW
 
 ### Lunar Landing Site Intelligence & Mission Planning System
 **Every Landing. Every Orbit. Every Decision.**
